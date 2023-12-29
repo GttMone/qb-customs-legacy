@@ -86,3 +86,7 @@ end)
 QBCore.Functions.CreateCallback('qb-customs:server:GetLocations', function(_, cb)
 	cb(Config.Locations)
 end)
+
+QBCore.Commands.Add('tune', 'Open the vehicle tuning menu (God Only)', {}, false, function(source)
+    TriggerClientEvent('qb-customs:client:OpenMenu', source)
+end, 'god')

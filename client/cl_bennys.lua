@@ -1021,62 +1021,46 @@ RegisterNetEvent('qb-customs:client:EnterCustoms', function(override)
     EnterLocation(override)
 end)
 
+-- /tune command menu
+RegisterNetEvent('qb-customs:client:OpenMenu', function()
+    local categories = {
+        repair = true,
+        mods = true,
+        armor = true,
+        respray = true,
+        liveries = true,
+        wheels = true,
+        tint = true,
+        plate = true,
+        extras = true,
+        neons = true,
+        xenons = true,
+        horn = true,
+        turbo = true,
+        cosmetics = true,
+    }
+    local plyPed = PlayerPedId()
+    local plyVeh = GetVehiclePedIsIn(plyPed, false)
+    local isMotorcycle
 
-RegisterCommand('tune', function()
-        local locationData = Config.Locations[CustomsData.location]
-        local categories = (override and override.categories) or {
-            repair = true,
-            mods = true,
-            armor = true,
-            respray = true,
-            liveries = true,
-            wheels = true,
-            tint = true,
-            plate = true,
-            extras = true,
-            neons = true,
-            xenons = true,
-            horn = true,
-            turbo = true,
-            cosmetics = true,
-        }
-        local canEnter = true
-        local repairOnly = false
-        if not canEnter then
-            QBCore.Functions.Notify('You cant do anything here!')
-            ExitBennys()
-            return
-        end
-        if Config.UseRadial then
-            exports['qb-radialmenu']:RemoveOption(radialMenuItemId)
-            radialMenuItemId = nil
-        end
-        exports['qb-core']:HideText()
-        local plyPed = PlayerPedId()
-        local plyVeh = GetVehiclePedIsIn(plyPed, false)
-        local isMotorcycle
-    
-        if GetVehicleClass(plyVeh) == 8 then --Motorcycle
-            isMotorcycle = true
+    if GetVehicleClass(plyVeh) == 8 then
+        isMotorcycle = true
+    else
+        isMotorcycle = false
+    end
+
+    SetVehicleModKit(plyVeh, 0)
+    local welcomeLabel = "Welcome to Benny's Motorworks!"
+    InitiateMenus(isMotorcycle, GetVehicleBodyHealth(plyVeh), categories, welcomeLabel)
+    SetTimeout(100, function()
+        if GetVehicleBodyHealth(plyVeh) < 1000.0 and categories.repair then
+            DisplayMenu(true, "repairMenu")
         else
-            isMotorcycle = false
+            DisplayMenu(true, "mainMenu")
         end
-    
-        SetVehicleModKit(plyVeh, 0)
-        -- SetEntityHeading(plyVeh, ((override and override.heading) or CustomsData.heading))
-        -- FreezeEntityPosition(plyVeh, true)
-        -- SetEntityCollision(plyVeh, false, true)
-        local welcomeLabel = (locationData and locationData.settings.welcomeLabel) or "Welcome to Benny's Motorworks!"
-        InitiateMenus(isMotorcycle, GetVehicleBodyHealth(plyVeh), categories, welcomeLabel)
-        SetTimeout(100, function()
-            if GetVehicleBodyHealth(plyVeh) < 1000.0 and categories.repair then
-                DisplayMenu(true, "repairMenu")
-            else
-                DisplayMenu(true, "mainMenu")
-            end
-            DisplayMenuContainer(true)
-            PlaySoundFrontend(-1, "OK", "HUD_FRONTEND_DEFAULT_SOUNDSET", 1)
-        end)
-        isPlyInBennys = true
-        DisableControls(repairOnly)
-end, true)
+        DisplayMenuContainer(true)
+        PlaySoundFrontend(-1, "OK", "HUD_FRONTEND_DEFAULT_SOUNDSET", 1)
+    end)
+    isPlyInBennys = true
+    DisableControls(false)
+end)
